@@ -1,0 +1,143 @@
+{
+  "name": "AI Agent workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "triggerAtHour": 7 },
+            { "triggerAtHour": 22 }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-560, 752],
+      "id": "651543b5-0213-433f-8760-57d62b8d6d64",
+      "name": "Run every day at 7AM",
+      "notesInFlow": true,
+      "notes": "Double-click to open"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "85b5c530-2c13-4424-ab83-05979bc879a5",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [160, 544],
+      "id": "99f7bb9e-f8c0-43ca-a9a8-a76634ac9611",
+      "name": "Output",
+      "notesInFlow": true,
+      "notes": "Double-click to open"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-560, 544],
+      "id": "a0390291-6794-4673-9a6a-5c3d3a5d9e4b",
+      "name": "Click ‘Execute workflow’ to run"
+    },
+    {
+      "parameters": {
+        "content": "## ⚡ Start here:",
+        "height": 224,
+        "width": 224,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-624, 480],
+      "id": "fac5929f-e065-4474-96b1-7bcc06834238",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [-272, 768],
+      "id": "b16482e8-0d48-4426-aa93-c3fee11dd3cd",
+      "name": "OpenAI Model",
+      "notesInFlow": true,
+      "notes": "Double-click to open"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an English tutor for Korean high school students.\n\nGenerate ONE short English sentence suitable for school exams.\n\nThen provide the result in the following numbered format ONLY:\n\n1. English sentence\n2. Natural Korean translation\n3. One key grammar or exam-related point (brief)\n4. One similar exam-style expression\n\nRules:\n- Sentence length: 8–15 words\n- No slang or casual expressions\n- Prefer grammar structures common in exams\n- Keep explanations concise\n- Do not add any extra comments or headers\n\nDate: {{ $now.format('yyyy-MM-dd') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [-272, 544],
+      "id": "084d56aa-d157-4964-9073-b36d9d9589c5",
+      "name": "AI Summary Agent",
+      "notesInFlow": true,
+      "notes": "Double-click to open"
+    },
+    {
+      "parameters": {
+        "content": "### Double click here to see the results:",
+        "height": 240,
+        "width": 192,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [112, 464],
+      "id": "a4b7a69a-0db8-4b9b-a81d-fd83378043a3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A2DSF2LAV",
+          "mode": "list",
+          "cachedResultName": "english"
+        },
+        "text": "={{ $json.output }}"
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [368, 544],
+      "id": "770815ce-6675-487f-9b58-1943f9dff3ed",
+      "name": "Send a message"
+    }
+  ],
+  "connections": {
+    "Run every day at 7AM": {
+      "main": [[{ "node": "AI Summary Agent", "type": "main", "index": 0 }]]
+    },
+    "Click ‘Execute workflow’ to run": {
+      "main": [[{ "node": "AI Summary Agent", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [[{ "node": "AI Summary Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "AI Summary Agent": {
+      "main": [[{ "node": "Output", "type": "main", "index": 0 }]]
+    },
+    "Output": {
+      "main": [[{ "node": "Send a message", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false
+}
